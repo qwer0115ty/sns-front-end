@@ -72,7 +72,8 @@ export default {
 
       this.$http.post('/api/user', {
         name: this.name,
-        sub: this.gu.sub
+        sub: this.gu.sub,
+        email: this.gu.email
       }).then(({ data }) => {
         localStorage.removeItem('gu')
         this.$store.commit('setGoogleUser', null)

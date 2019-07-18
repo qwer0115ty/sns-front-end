@@ -2,7 +2,7 @@
     <v-card class="mb40 ml-2 mr-2">
         <v-card-title primary-title>
             <router-link class="ml-2 pb-1 w300 title none-text-deco" :to="{ name:'user/main', params: { seq: board.user.seq }}">{{board.user.name}}</router-link>
-            <v-btn icon right class="pb-1 more-btn" @click="popupMenu(true)" v-if="isPopMenuAccessable">
+            <v-btn icon right class="pb-1 more-btn p-absolute" @click="popupMenu(true)" v-if="isPopMenuAccessable">
                 <v-icon>more_vert</v-icon>
                 <pop-menu v-on:close="popupMenu(false)" @deleteBoard="$emit('deleteBoard', $event)" :isShow="isPopMenu" :board="board" :isAdmin="isAdmin"/>
             </v-btn>

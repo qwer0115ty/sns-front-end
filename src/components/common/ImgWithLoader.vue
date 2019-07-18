@@ -1,5 +1,5 @@
 <template>
-    <v-img v-if="src != null" :src="src" @click="$emit('click')">
+    <v-img v-if="src != null" :src="src" lazy-src="https://hy-sns1906.s3.ap-northeast-2.amazonaws.com/res/img-ld.png" @click="$emit('click')">
         <template v-slot:placeholder>
             <v-layout
                 fill-height

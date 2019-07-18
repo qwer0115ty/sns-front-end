@@ -1,4 +1,5 @@
 import store from '@/store'
+import router from '@/router'
 import { USER_STORAGE_ITEMS } from '@/const'
 
 export default {
@@ -7,5 +8,6 @@ export default {
       localStorage.removeItem(USER_STORAGE_ITEMS[key])
     }
     store.commit('signout')
+    router.push('/')
   }
 }
