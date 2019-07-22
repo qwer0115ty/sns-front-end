@@ -30,7 +30,7 @@
               <v-flex xs12 pt-1 pl-3 pr-3 sm9>
                 <v-textarea name="content"
                   v-model="board.content"
-                  v-validate="'required'"
+                  v-validate="'required|max:300'"
                   clearable
                   counter
                   :error="contentFlags.touched && contentFlags.valid == false"
@@ -41,13 +41,15 @@
               </v-flex>
             </v-layout>
             <v-card-actions>
-              <v-btn type="submit" flat color="cyan">수정완료</v-btn>
+              <v-btn :loading="isUpdateProgress" :disabled="isUpdateProgress"
+              type="submit" flat color="cyan">수정완료</v-btn>
             </v-card-actions>
             <alert-bar ref="alertBar"/>
           </v-card>
         </form>
       </v-flex>
     </v-layout>
+    <confirm ref="confirm"/>
   </v-content>
 </template>
 
@@ -58,16 +60,20 @@ import PreAuth from '@/service/auth/PreAuthorizeService'
 import GooleAuthService from '@/service/auth/GooleAuthService'
 import Util from '@/util/CustomUtil'
 import flags from '@/util/VeeFlags'
+import SnackBarBus from '@/service/HeaderSnackBarBus'
+import Confirm from '@/components/common/Dialog'
 
 export default {
   components: {
     AlertBar,
-    ImgWithLoader
+    ImgWithLoader,
+    Confirm
   },
   data () {
     return {
       board: null,
-      dataURI: null
+      dataURI: null,
+      isUpdateProgress: false
     }
   },
   created () {
@@ -86,33 +92,6 @@ export default {
     select () {
       document.getElementById('imgPreviewLabel').click()
     },
-    setImgPreview (file) {
-      let reader = new FileReader()
-      reader.readAsDataURL(file)
-      let tempImage = new Image()
-      reader.onload = _ => {
-        tempImage.src = reader.result
-      }
-      let shiftX = 0
-      let shiftY = 0
-      let orgshort = 0
-      let $this = this
-      tempImage.onload = function () {
-        if (this.width > this.height) {
-          orgshort = this.height
-          shiftX = (this.width - this.height) / 2
-        } else {
-          orgshort = this.width
-          shiftY = (this.height - this.width) / 2
-        }
-        let canvas = document.createElement('canvas')
-        let canvasContext = canvas.getContext('2d')
-        canvas.width = orgshort
-        canvas.height = orgshort
-        canvasContext.drawImage(this, shiftX, shiftY, orgshort, orgshort, 0, 0, orgshort, orgshort)
-        $this.dataURI = canvas.toDataURL('image/png')
-      }
-    },
     failToSelectImg () {
       document.getElementById('fileInput').value = ''
       this.board.file = null
@@ -128,7 +107,9 @@ export default {
           this.error('20MB 이하의 파일만 업로드 가능합니다.')
           this.failToSelectImg()
         } else {
-          this.setImgPreview(evtFile)
+          Util.setImgPreview(evtFile).then(data => {
+            this.dataURI = data
+          })
           this.board.file = evtFile
         }
       }
@@ -138,7 +119,7 @@ export default {
     },
     updateBoard (board) {
       if (this.contentFlags.valid === false) {
-        this.error('내용을 입력하세요.')
+        this.error(this.errors.first('content'))
       } else if (this.$store.getters.getUser == null) {
         GooleAuthService.gooleAuthPop(_ => {
           this.putApi(board)
@@ -146,17 +127,27 @@ export default {
           this.$router.push({ name: 'signup' })
         })
       } else {
-        this.putApi(board)
+        this.$refs.confirm.confirm({
+          title: '게시글 저장',
+          body: '변경한 게시글을 등록하시겠습니까?'
+        }).then(_ => {
+          this.putApi(board)
+        }, _ => {
+        })
       }
     },
     putApi (board) {
+      this.isUpdateProgress = true
       let formData = new FormData()
       formData.append('file', board.file)
       formData.append('data', board.content)
       this.$http.post('/api/board/' + this.$route.params.seq + '/form', formData).then(result => {
         this.$router.push({ name: 'board/detail', params: { seq: this.board.seq } })
+        SnackBarBus.snackBar('게시글 수정이 완료되었습니다.')
       }, err => {
         console.error(err)
+      }).then(_ => {
+        this.isUpdateProgress = false
       })
     }
   },

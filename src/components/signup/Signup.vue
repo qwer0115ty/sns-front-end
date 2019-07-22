@@ -49,6 +49,7 @@
 import Modal from '@/components/common/Dialog'
 import { USER_STORAGE_ITEMS } from '@/const'
 import flags from '@/util/VeeFlags'
+import SnackBarBus from '@/service/HeaderSnackBarBus'
 
 export default {
   components: {
@@ -88,6 +89,7 @@ export default {
           }
         }
         this.$router.push({ name: 'main' })
+        SnackBarBus.snackBar(this.name + '님, 환영합니다.')
       }, err => {
         console.error(err)
         this.$refs.modal.alert({

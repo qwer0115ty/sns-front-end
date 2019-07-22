@@ -22,11 +22,15 @@
 }
 
 .empty-box {
-    padding: 100px 0;
+    padding: 240px 0;
     display: block;
     margin: 0 auto;
 }
 
 .p-absolute {
     position: absolute!important;
+}
+
+.profile-background {
+    background-color: #adadad;
 }

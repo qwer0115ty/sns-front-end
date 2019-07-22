@@ -1,5 +1,8 @@
 <template>
-    <v-btn icon :to="to" @click="$emit('click')">
+    <v-btn
+        icon :to="to"
+        @click="$emit('click')"
+        @mouseover="$emit('mouseover')">
         <v-icon>
             {{iconName}}
         </v-icon>

@@ -19,7 +19,7 @@
           </v-layout>
         </v-card>
       </v-flex>
-      <transition name="fade">
+      <v-fade-transition>
         <v-btn
           v-if="nowScrollHeight > 0"
           dark
@@ -31,20 +31,20 @@
         >
           <v-icon x-large>expand_less</v-icon>
         </v-btn>
-      </transition>
-      <transition name="fade">
+      </v-fade-transition>
+      <v-fade-transition>
         <v-btn
           v-if="! isBottom"
           dark
           fab
           right
-          style="position: fixed; bottom:120px; z-index: 200;"
+          style="position: fixed; bottom:120px; z-index: 1;"
           color="orange"
           @click="toBottom()"
         >
           <v-icon x-large>expand_more</v-icon>
         </v-btn>
-      </transition>
+      </v-fade-transition>
     </v-layout>
   </v-content>
 </template>
@@ -128,7 +128,7 @@ export default {
       }
     },
     handleScroll () {
-      this.nowScrollHeight = document.documentElement.scrollTop
+      this.nowScrollHeight = Math.max(window.pageYOffset, document.documentElement.scrollTop, document.body.scrollTop)
       if (this.getIsBottom()) {
         if (this.page < this.totalPages) {
           this.getPage(++this.page)
@@ -152,12 +152,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-</style>

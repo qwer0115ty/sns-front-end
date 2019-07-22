@@ -26,7 +26,7 @@
               <v-flex xs12 pt-1 pl-3 pr-3 sm9>
                 <v-textarea name="content"
                   v-model="board.content"
-                  v-validate="'required'"
+                  v-validate="'required|max:300'"
                   clearable
                   counter
                   :error="contentFlags.touched && contentFlags.valid == false"
@@ -37,13 +37,15 @@
               </v-flex>
             </v-layout>
             <v-card-actions>
-              <v-btn type="submit" flat color="cyan">등록하기</v-btn>
+              <v-btn :loading="isInsertProgress" :disabled="isInsertProgress"
+                type="submit" flat color="cyan">등록하기</v-btn>
             </v-card-actions>
             <alert-bar ref="alertBar"/>
           </v-card>
         </form>
       </v-flex>
     </v-layout>
+    <confirm ref="confirm"/>
   </v-content>
 </template>
 
@@ -53,11 +55,14 @@ import ImgWithLoader from '@/components/common/ImgWithLoader'
 import GooleAuthService from '@/service/auth/GooleAuthService'
 import Util from '@/util/CustomUtil'
 import flags from '@/util/VeeFlags'
+import SnackBarBus from '@/service/HeaderSnackBarBus'
+import Confirm from '@/components/common/Dialog'
 
 export default {
   components: {
     AlertBar,
-    ImgWithLoader
+    ImgWithLoader,
+    Confirm
   },
   data () {
     return {
@@ -65,39 +70,13 @@ export default {
         content: null,
         file: null
       },
-      dataURI: null
+      dataURI: null,
+      isInsertProgress: false
     }
   },
   methods: {
     select () {
       document.getElementById('imgPreviewLabel').click()
-    },
-    setImgPreview (file) {
-      let tempImage = new Image()
-      let reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = _ => {
-        tempImage.src = reader.result
-      }
-      let shiftX = 0
-      let shiftY = 0
-      let orgshort = 0
-      let $this = this
-      tempImage.onload = function () {
-        if (this.width > this.height) {
-          orgshort = this.height
-          shiftX = (this.width - this.height) / 2
-        } else {
-          orgshort = this.width
-          shiftY = (this.height - this.width) / 2
-        }
-        let canvas = document.createElement('canvas')
-        let canvasContext = canvas.getContext('2d')
-        canvas.width = orgshort
-        canvas.height = orgshort
-        canvasContext.drawImage(this, shiftX, shiftY, orgshort, orgshort, 0, 0, orgshort, orgshort)
-        $this.dataURI = canvas.toDataURL('image/png')
-      }
     },
     failToSelectImg () {
       document.getElementById('fileInput').value = ''
@@ -114,7 +93,9 @@ export default {
           this.error('20MB 이하의 파일만 업로드 가능합니다.')
           this.failToSelectImg()
         } else {
-          this.setImgPreview(evtFile)
+          Util.setImgPreview(evtFile).then(data => {
+            this.dataURI = data
+          })
           this.board.file = evtFile
         }
       }
@@ -124,7 +105,7 @@ export default {
     },
     writeBoard (board) {
       if (this.contentFlags.valid === false) {
-        this.error('내용을 입력하세요.')
+        this.error(this.errors.first('content'))
       } else if (board.file == null) {
         this.error('사진을 선택하세요.')
       } else if (this.$store.getters.getUser == null) {
@@ -134,17 +115,27 @@ export default {
           this.$router.push({ name: 'signup' })
         })
       } else {
-        this.postApi(board)
+        this.$refs.confirm.confirm({
+          title: '게시글 등록',
+          body: '작성한 게시글을 등록하시겠습니까?'
+        }).then(_ => {
+          this.postApi(board)
+        }, _ => {
+        })
       }
     },
     postApi (board) {
+      this.isInsertProgress = true
       let formData = new FormData()
       formData.append('file', board.file)
       formData.append('data', board.content)
       this.$http.post('/api/board', formData).then(result => {
         this.$router.push({ name: 'main' })
+        SnackBarBus.snackBar('게시글 등록이 완료되었습니다.')
       }, err => {
         console.error(err)
+      }).then(_ => {
+        this.isInsertProgress = false
       })
     }
   },
@@ -207,9 +198,6 @@ export default {
     }
 
     #imgPreviewDiv {
-      /* width: 100%;
-      height: 0%;
-      padding-bottom: 100%; */
       display: none;
     }
 

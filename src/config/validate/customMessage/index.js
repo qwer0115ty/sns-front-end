@@ -9,7 +9,8 @@ Validator.localize('ko', Object.assign(ko, {
       max: (name, maxValue) => `${maxValue}글자 이하로 입력하세요.`
     },
     content: {
-      required: _ => '내용을 입력하세요.'
+      required: _ => '내용을 입력하세요.',
+      max: (name, maxValue) => `내용은 ${maxValue}글자 이하로 입력해야 합니다.`
     }
   }
 }))
