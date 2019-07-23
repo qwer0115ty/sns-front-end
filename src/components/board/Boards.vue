@@ -130,7 +130,7 @@ export default {
     handleScroll () {
       this.nowScrollHeight = Math.max(window.pageYOffset, document.documentElement.scrollTop, document.body.scrollTop)
       if (this.getIsBottom()) {
-        if (this.page < this.totalPages) {
+        if (this.page < this.totalPages && this.getPageProgress === false) {
           this.getPage(++this.page)
         }
       }
