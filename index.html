@@ -6,6 +6,14 @@
     <title>sns-front-end</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
   </head>
+  <script>
+    let agent = navigator.userAgent.toLowerCase()
+    console.log(agent.indexOf('msie'), navigator.appName, navigator.userAgent.search('Trident'))
+    if ((navigator.appName === 'Netscape' && navigator.userAgent.search('Trident') !== -1) ||
+      (agent.indexOf('msie') !== -1)) {
+      alert('인터넷 익스플로러 브라우저에서는 아직 준비중입니다. 다른 브라우저를 이용해주세요.(크롬 브라우저 사용을 권장합니다.)')
+    }
+  </script>
   <body>
     <div id="app"></div>
     <!-- built files will be auto injected -->
