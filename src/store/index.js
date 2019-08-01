@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { USER_ITEM_NAME } from '@/const'
+import { TOKEN_ITEM_NAME } from '@/const'
+import jwtDecode from 'jwt-decode'
 
 Vue.use(Vuex)
 
@@ -23,8 +24,8 @@ export default new Vuex.Store({
   },
   getters: {
     getUser: state => {
-      if (state.user == null && localStorage[USER_ITEM_NAME] != null && localStorage[USER_ITEM_NAME] !== undefined) {
-        let user = JSON.parse(localStorage[USER_ITEM_NAME])
+      if (state.user == null && localStorage[TOKEN_ITEM_NAME] != null) {
+        let user = jwtDecode(localStorage.getItem(TOKEN_ITEM_NAME)).user
         this.a.commit('setUser', user)
       }
       return state.user

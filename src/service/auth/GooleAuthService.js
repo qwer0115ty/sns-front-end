@@ -1,5 +1,6 @@
 import store from '@/store'
-import { BACK_END_HOST, USER_STORAGE_ITEMS } from '@/const'
+import { BACK_END_HOST, USER_STORAGE_ITEMS, TOKEN_ITEM_NAME } from '@/const'
+import jwtDecode from 'jwt-decode'
 
 export default {
   gooleAuthPop (success, fail) {
@@ -15,7 +16,7 @@ export default {
           for (let key in USER_STORAGE_ITEMS) {
             localStorage.setItem(USER_STORAGE_ITEMS[key], data[key])
           }
-          store.commit('setUser', JSON.parse(data.user))
+          store.commit('setUser', jwtDecode(localStorage.getItem(TOKEN_ITEM_NAME)).user)
           success()
         } else {
           localStorage.setItem('gu', data.gu)
