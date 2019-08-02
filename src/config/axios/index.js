@@ -7,7 +7,7 @@ import AuthService from '@/service/auth/AuthService'
 Vue.prototype.$http = axios
 
 axios.interceptors.request.use(request => {
-  if (store.getters.getUser != null) {
+  if (store.getters.getUser != null && !AuthService.isTokenExpired()) {
     request.headers.authorization = `Bearer ${localStorage.getItem(TOKEN_ITEM_NAME)}`
   }
   return request
